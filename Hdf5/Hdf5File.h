@@ -464,7 +464,7 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 #include <map>
-
+#include <string>
 #include <Utils/DimensionSizes.h>
 
 /// Datatype of dataset names in the HDF5 files.

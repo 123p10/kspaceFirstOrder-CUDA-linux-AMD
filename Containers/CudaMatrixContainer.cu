@@ -53,7 +53,7 @@ template class CudaMatrixContainer<MatrixContainer::getMatrixIdxCount()>;
  * @brief    This variable holds pointer data to device matrices present in MatrixContainer.
  * @details  This variable is imported as extern into other CUDA units.
  */
-__constant__ CudaMatrixContainer<MatrixContainer::getMatrixIdxCount()> cudaMatrixContainer;
+/*__constant__*/ CudaMatrixContainer<MatrixContainer::getMatrixIdxCount()> cudaMatrixContainer;
 
 //--------------------------------------------------------------------------------------------------------------------//
 //------------------------------------------------- Public methods ---------------------------------------------------//

@@ -80,16 +80,16 @@
 # SEMI static lining is default since it is expected the binary will run on the 
 # same system. 
 # Everything will be linked statically, may not work on all GPUs
-#LINKING = STATIC
+LINKING = STATIC
 # Everything will be linked dynamically
 #LINKING = DYNAMIC
 # Everything but CUDA will be linked statically
-LINKING = SEMI
+#LINKING = SEMI
 
 # Set up paths: If using modules, the paths are set up automatically,
 #               otherwise, set paths manually
 CUDA_DIR = $(CUDA_HOME)
-HDF5_DIR = $(EBROOTHDF5)
+HDF5_DIR = /home/owen/work/hdf5-1.8.16/build/
 ZLIB_DIR = $(EBROOTZLIB)
 SZIP_DIR = $(EBROOTSZIP)
 
@@ -110,26 +110,14 @@ GIT_HASH       = -D__KWAVE_GIT_HASH__=\"468dc31c2842a7df5f2a07c3a13c16c9b0b2b770
 .RECIPEPREFIX += 
 
 # What CUDA GPU architectures to include in the binary
-CUDA_ARCH = --generate-code arch=compute_50,code=sm_50 \
-            --generate-code arch=compute_52,code=sm_52 \
-            --generate-code arch=compute_53,code=sm_53 \
-            --generate-code arch=compute_60,code=sm_60 \
-            --generate-code arch=compute_61,code=sm_61 \
-            --generate-code arch=compute_62,code=sm_62 \
-            --generate-code arch=compute_70,code=sm_70 \
-            --generate-code arch=compute_72,code=sm_72 \
-            --generate-code arch=compute_75,code=sm_75 \
-            --generate-code arch=compute_80,code=sm_80 \
-            --generate-code arch=compute_87,code=sm_87 \
-            --generate-code arch=compute_89,code=sm_89 \
-            --generate-code arch=compute_90,code=sm_90 \
-            --generate-code arch=compute_90a,code=sm_90a
+CUDA_ARCH = --generate-code arch=sm_86
 
 # What libraries to link and how
+#$(CUDA_DIR)/lib64/libcufft_static.a
 ifeq ($(LINKING), STATIC)
   LDLIBS = $(HDF5_DIR)/lib/libhdf5_hl.a         \
+		   $(CUDA_DIR)/lib64/libcufft_static.a  \
            $(HDF5_DIR)/lib/libhdf5.a            \
-           $(CUDA_DIR)/lib64/libcufft_static.a  \
            $(CUDA_DIR)/lib64/libculibos.a       \
            $(CUDA_DIR)/lib64/libcudart_static.a \
 	   -lz					\
@@ -204,11 +192,11 @@ ifeq ($(COMPILER), GNU)
               $(INCLUDES)                        \
               --device-c --restrict
 
+#              -Xlinker="-rpath,$(HDF5_DIR)/lib,-rpath,$(CUDA_DIR)/lib64" \
   # Set linker flags and library files directories
   LDFLAGS   = -Xcompiler="$(OPENMP)" \
-              -Xlinker="-rpath,$(HDF5_DIR)/lib:$(CUDA_DIR)/lib64" \
               -std=c++11             \
-               $(LIB_PATHS)
+               $(LIB_PATHS) -v
 endif
 
 ############################ NVCC + Intel icpc #################################
@@ -315,17 +303,17 @@ all: $(TARGET)
 
 # Link target
 $(TARGET): $(DEPENDENCIES)
-  $(CXX) $(LDFLAGS) $(DEPENDENCIES) $(LDLIBS) -o $@
+	$(CXX) $(LDFLAGS) $(DEPENDENCIES) $(LDLIBS) -o $@
 
 # Compile CPU units
 %.o: %.cpp
-  $(CXX) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 # Compile CUDA units
 %.o: %.cu
-  $(CXX) $(CXXFLAGS) $(CUDA_ARCH) -o $@ -c $<
+	$(CXX) $(CXXFLAGS) $(CUDA_ARCH) -o $@ -c $<
 
 # Clean repository
 .PHONY: clean
 clean:
-  rm -f $(DEPENDENCIES) $(TARGET)
+	rm -f $(DEPENDENCIES) $(TARGET)
